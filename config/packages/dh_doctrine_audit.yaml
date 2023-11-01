@@ -1,0 +1,10 @@
+dh_doctrine_audit:
+    enabled: true
+    table_prefix: 'audit_'
+    table_suffix: ''
+    timezone: 'America/Sao_Paulo'
+    ignored_columns:    # properties ignored by the audit process in any audited entity
+        - createdAt
+        - updatedAt
+        - deletedAt
+    enabled_viewer: true

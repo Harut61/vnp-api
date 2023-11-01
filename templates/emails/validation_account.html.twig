@@ -1,0 +1,5 @@
+<h1>{% trans %}email.invitation.welcome{% endtrans %}!</h1>
+
+<p>{% trans %}email.invitation.title{% endtrans %}!</p>
+<p><code>{{ user.email }}</code></p>
+<a href="{{ uui_entrypoint }}sub_user/register/confirm?confirmToken={{ token }}">{% trans %}email.invitation.active_link{% endtrans %}</a>

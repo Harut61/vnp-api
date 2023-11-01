@@ -1,0 +1,42 @@
+email:
+    invitation:
+        subject: "Invited On IVNEWS"
+        welcome: "Welcome To IVNEWS"
+        title: "You are invited on IVNEWS"
+        active_link: "Click here to activate your account"
+    reset_password:
+        subject: "RESET Password OTP"
+        welcome: "IVNEWS"
+        title: "Here is your OTP to Reset your password"
+    reset_email:
+        subject: "RESET Email OTP"
+        welcome: "IVNEWS"
+        title: "Here is your OTP to Reset your email"
+    source_video_media_info_error:
+        subject: "ERROR: Source Video"
+        message: "Invalid MediaInfo Found For SourceVideo, This is due to invalid file uploaded!"
+        link: "Click here to know more"
+    source_video_error:
+        subject: "ERROR: Source Video"
+        message: "Transcoding Failed!"
+        link: "Click here to know more"
+    story_transcoding_error:
+        subject: "ERROR: Story Transcoding"
+        message: "Transcoding Failed!"
+        link: "Click here to know more"
+    interstitial_transcoding_error:
+        subject: "ERROR: Interstitial Transcoding"
+        message: "Iranscoding Failed!"
+        link: "Click here to know more"
+    transcoding_limit_exceeded_error:
+        subject: "ALERT: Transcoding Limit Exceeded"
+        message: "Transcoding Limit Exceeded on Env !"
+    end_user_registeration_confirm:
+        subject: "Your Account is Activated"
+        welcome: "IVNEWS"
+        title: "Your Account is activated successfully!"
+    end_user_register:
+        subject: "Activate your Account"
+        welcome: "Welcome To IVNEWS"
+        title: "Here is your OTP to Activate your Account"
+        active_link: "Click here to activate your account"

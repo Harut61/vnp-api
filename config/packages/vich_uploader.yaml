@@ -1,0 +1,15 @@
+vich_uploader:
+    db_driver: orm
+    storage: gaufrette
+    mappings:
+        media_object:
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            inject_on_load: true
+            uri_prefix: ""
+            upload_destination: media_object
+            delete_on_update:   true
+            delete_on_remove:   true
+            directory_namer:
+                service: Vich\UploaderBundle\Naming\CurrentDateTimeDirectoryNamer
+                options:
+                    date_time_format: 'Y/d/m' # will create directory "2018/23/09" for curent date "2018-09-23"

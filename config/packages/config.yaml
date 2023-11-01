@@ -1,0 +1,14 @@
+knp_gaufrette:
+    stream_wrapper: ~
+    adapters:
+        document_adapter:
+            aws_s3:
+                service_id: ivn_file_store.s3_client
+                bucket_name: '%env(APP_NAME)%-%env(IVN_ENV)%-%env(VOD_BUCKET)%'
+                detect_content_type: true
+                options:
+                    create: false
+                    acl: 'private'
+    filesystems:
+        media_object:
+            adapter: document_adapter

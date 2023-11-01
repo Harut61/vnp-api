@@ -1,0 +1,59 @@
+default:
+  gherkin:
+    cache: ~
+  calls:
+    error_reporting: 16383 # E_ALL & ~E_USER_DREPRECATED
+  suites:
+    default:
+      contexts:
+        - AuthContext: { kernel: '@kernel', doctrine: '@doctrine', 'jwtManager': '@lexik_jwt_authentication.jwt_manager' , 'userPasswordEncoder': '@security.user_password_encoder.generic' }
+        - JsonContext
+        - FileUploadContext
+        - FeatureContext: { kernel: '@kernel' }
+        - Behat\MinkExtension\Context\MinkContext
+        - Behatch\Context\RestContext
+        - EntityHelperContext:
+            em: '@doctrine.orm.entity_manager'
+            urlGenerator: '@api_platform.path_segment_name_generator'
+            router: '@router'
+
+  extensions:
+    Behat\Symfony2Extension:
+      kernel:
+        bootstrap: "features/bootstrap/bootstrap.php"
+        class: "App\\Kernel"
+    Behat\MinkExtension:
+      base_url: "http://localhost/"
+      files_path: "%paths.base%/public/dummy"
+      sessions:
+        default:
+          symfony2: ~
+    Behatch\Extension: ~
+#    LeanPHP\Behat\CodeCoverage\Extension:
+#          # http auth (optional)
+#          auth:        ~
+#          # select which driver to use when gatherig coverage data
+#          drivers:
+#            - local     # local Xdebug driver
+#          # filter options
+#          filter:
+#            forceCoversAnnotation:                false
+#            mapTestClassNameToCoveredClassName:   false
+#            whitelist:
+#              addUncoveredFilesFromWhitelist:     true
+#              processUncoveredFilesFromWhitelist: false
+#              include:
+#                directories:
+#                  'src':
+#                    suffix: '.php'
+#              exclude:
+#                directories:
+#                    'src/DBAL': ~
+#                files:
+#                  - 'src/Kernel.php'
+#          # report configuration
+#          report:
+#            # report format (html, clover, php, text)
+#            format:    clover
+#            # report options
+#            options:

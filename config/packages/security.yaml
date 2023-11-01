@@ -1,0 +1,80 @@
+security:
+    encoders:
+        App\Entity\AdminUser:
+            algorithm: argon2i
+        App\Entity\EndUser:
+            algorithm: argon2i
+
+    providers:
+        app_end_user_provider:
+            id: App\Security\Provider\EndUserProvider
+        app_user_provider:
+            id: App\Security\Provider\AdminUserProvider            
+        chain_provider:
+            chain:
+                providers: [app_end_user_provider]
+
+    firewalls:
+        refresh:
+            pattern:  ^/token/refresh
+            stateless: true
+            anonymous: true
+        dev:
+            pattern: ^/_(profiler|wdt)
+            security: false
+#        end_user:
+#            pattern:  ^/end_user
+#            anonymous: true
+#            provider: chain_provider
+#            json_login:
+#                check_path: /end_user/authentication_token
+#                username_path: email
+#                password_path: password
+#                success_handler: lexik_jwt_authentication.handler.authentication_success
+#                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+#            guard:
+#                authenticators:
+#                    - app.jwt_token_authenticator
+        main:
+            anonymous: true
+            provider: chain_provider
+            json_login:
+                check_path: /authentication_token
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            guard:
+                authenticators:
+                    - app.jwt_token_authenticator
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        - { path: ^/admin/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/register/confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/reset/password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/update/password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/authentication_token, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/authentication_token, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/auth/google, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/auth/apple, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/site_infos, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET]}
+        - { path: ^/end_user/profile, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/end_user/exist, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/register/resend/otp, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/register/confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/news_markets, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/vne, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/reset/password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/end_user/update/password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/s3/folder, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/s3/sub/folder, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/stories/update_last_chunk, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/stories/details }
+        - { path: ^/bunny/cdn/purge/cache, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

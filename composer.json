@@ -1,0 +1,159 @@
+{
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=7.1.3",
+        "ext-ctype": "*",
+        "ext-grpc": "^1.35",
+        "ext-iconv": "*",
+        "api-platform/core": "^2.5",
+        "aws/aws-sdk-php": "^3.158",
+        "chrisyue/php-m3u8": "^3.4",
+        "composer/composer": "^1.10",
+        "composer/package-versions-deprecated": "^1.11",
+        "damienharper/doctrine-audit-bundle": "^3.4",
+        "doctrine/annotations": "^1.11",
+        "doctrine/doctrine-bundle": "^2.1",
+        "doctrine/doctrine-migrations-bundle": "^3.0",
+        "doctrine/orm": "^2.7",
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "gedmo/doctrine-extensions": "v3.0.0-beta2",
+        "gesdinet/jwt-refresh-token-bundle": "^0.9.1",
+        "gliterd/backblaze-b2": "^1.4",
+        "google/apiclient": "^2.9",
+        "google/protobuf": "^3.14",
+        "grpc/grpc": "^1.35",
+        "knplabs/knp-gaufrette-bundle": "^0.7.1",
+        "lexik/jwt-authentication-bundle": "^2.11.2",
+        "mhor/php-mediainfo": "^5.2",
+        "nelmio/cors-bundle": "^2.1",
+        "phpdocumentor/reflection-docblock": "^5.2",
+        "predis/predis": "^1.1",
+        "ramsey/uuid": "^4.1",
+        "sentry/sentry-symfony": "^3.5",
+        "snc/redis-bundle": "^3.2",
+        "symfony/asset": "4.4.*",
+        "symfony/console": "4.4.*",
+        "symfony/dotenv": "4.4.*",
+        "symfony/expression-language": "4.4.*",
+        "symfony/flex": "^1.3.1",
+        "symfony/form": "4.4.*",
+        "symfony/framework-bundle": "4.4.*",
+        "symfony/messenger": "4.4.*",
+        "symfony/monolog-bundle": "^3.5",
+        "symfony/property-access": "4.4.*",
+        "symfony/property-info": "4.4.*",
+        "symfony/security-bundle": "4.4.*",
+        "symfony/serializer": "4.4.*",
+        "symfony/swiftmailer-bundle": "^3.4",
+        "symfony/twig-bundle": "4.4.*",
+        "symfony/validator": "4.4.*",
+        "symfony/yaml": "4.4.*",
+        "vich/uploader-bundle": "^1.18"
+    },
+    "require-dev": {
+        "behat/behat": "^3.5",
+        "behat/mink": "^1.7@dev",
+        "behat/mink-browserkit-driver": "^1.3",
+        "behat/mink-extension": "^2.3",
+        "behat/mink-goutte-driver": "^1.2",
+        "behat/symfony2-extension": "^2.1",
+        "behatch/contexts": "^3.2",
+        "doctrine/doctrine-fixtures-bundle": "^3.3",
+        "fzaninotto/faker": "^1.9",
+        "leanphp/behat-code-coverage": "^3.4",
+        "phpmd/phpmd": "^2.9",
+        "phpstan/phpstan": "^0.12.43",
+        "phpunit/phpunit": "7.*",
+        "squizlabs/php_codesniffer": "^3.5",
+        "symfony/maker-bundle": "^1.29",
+        "symfony/phpunit-bridge": "^5.1",
+        "symfony/stopwatch": "^4.4",
+        "symfony/web-profiler-bundle": "^4.4"
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/VneUtil/",
+            "App\\": "src/",
+            "GPBMetadata\\": "src/VneUtil/GPBMetadata/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "": "src/VneUtil/",
+            "GPBMetadata\\": "src/VneUtil/GPBMetadata/",
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "replace": {
+        "paragonie/random_compat": "2.*",
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php71": "*",
+        "symfony/polyfill-php70": "*",
+        "symfony/polyfill-php56": "*"
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@auto-scripts"
+        ],
+        "local-setup": [
+            "chmod -R 777 config/jwt",
+            "bin/console doctrine:database:create --if-not-exists",
+            "bin/console doctrine:schema:drop -f",
+            "bin/console doctrine:schema:update -f",
+            "bin/console doctrine:migrations:sync-metadata-storage",
+            "bin/console doctrine:migrations:version --add --all",
+            "bin/console ivnews:paas-setup",
+            "bin/console ivnews:vne-sync",
+            "openssl genrsa -out config/jwt/private.pem 4096",
+            "openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem"
+        ],
+        "deploy": [
+            "bin/console doctrine:database:create --if-not-exists",
+            "bin/console doctrine:migrations:sync-metadata-storage",
+            "bin/console cache:clear",
+            "bin/console doctrine:cache:clear-metadata",
+            "bin/console doctrine:cache:clear-query",
+            "bin/console doctrine:cache:clear-result",
+            "bin/console doctrine:migrations:migrate --no-interaction",
+            "bin/console ivnews:paas-setup",
+            "bin/console ivnews:vne-sync",
+            "bin/console ivnews:create:interstitial"
+        ],
+        "behat": [
+            "bin/console lexik:jwt:generate-keypair --overwrite",
+            "bin/console doctrine:cache:clear-metadata",
+            "bin/console doctrine:cache:clear-query",
+            "bin/console doctrine:cache:clear-result",
+            "APP_ENV=test bin/console d:d:c --if-not-exists",
+            "APP_ENV=test bin/console d:s:d -f",
+            "APP_ENV=test bin/console d:s:u -f",
+            "APP_ENV=test bin/console doctrine:fixtures:load --no-interaction",
+            "APP_ENV=test bin/console ivnews:paas-setup",
+            "APP_ENV=test phpdbg -qrr -d memory_limit=-1 vendor/bin/behat --colors --snippets-for"
+        ]
+    },
+    "conflict": {
+        "symfony/symfony": "*"
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": true,
+            "require": "4.4.*"
+        }
+    }
+}

@@ -1,0 +1,14 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+gesdinet_jwt_refresh_token:
+    path: /token/refresh
+    controller: gesdinet.jwtrefreshtoken::refresh
+
+#authentication_token:
+#    path: /authentication_token
+#    methods: ['POST']
+
+swagger_ui:
+    path: /docs
+    controller: api_platform.swagger.action.ui

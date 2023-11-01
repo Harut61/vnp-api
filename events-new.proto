@@ -1,0 +1,756 @@
+/*
+ * GRPC events in VNE and service definition.
+ */
+syntax = "proto3";
+package endpoints.events;
+import "google/protobuf/any.proto";
+
+
+
+service Events {
+  rpc Ping (PingRequest) returns (PingReply) {}
+  rpc AddUser (AddUserRequest) returns (AddUserReply) {}
+  rpc AddStory (AddStoryRequest) returns (AddStoryReply) {}
+  rpc CreateLineup (CreateLineupRequest) returns (CreateLineupReply) {}
+  rpc DeleteStory (DeleteStoryRequest) returns (DeleteStoryReply) {}
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply) {}
+  rpc EditUser (EditUserRequest) returns (EditUserReply) {}
+  rpc EditStory (EditStoryRequest) returns (EditStoryReply) {}
+  rpc GetSimilarStories (GetSimilarStoriesRequest) returns (GetSimilarStoriesReply) {}
+  rpc GetStoryTags (GetStoryTagsRequest) returns (GetStoryTagsReply) {}
+  rpc GetTags (GetTagsRequest) returns (GetTagsReply) {}
+  rpc GetPreferences (GetPreferencesRequest) returns (GetPreferencesReply) {}
+  rpc GetUserStory (GetUserStoryRequest) returns (GetUserStoryReply) {}
+  rpc ReSync (ReSyncRequest) returns (ReSyncReply) {}
+  rpc AddSource (AddSourceRequest) returns (AddSourceReply) {}
+  rpc EditSource (EditSourceRequest) returns (EditSourceReply) {}
+  rpc GetSources (GetSourcesRequest) returns (GetSourcesReply) {}
+  rpc AddDMA (AddDMARequest) returns (AddDMAReply) {}
+  rpc UpdateDMA (UpdateDMARequest) returns (UpdateDMAReply) {}
+  rpc GetDMA (GetDMARequest) returns (GetDMAReply) {}
+  rpc EditDMAName (EditDMANameRequest) returns (EditDMANameRequest) {}
+  rpc AddPreference (AddPreferenceRequest) returns (AddPreferenceReply) {}
+  rpc DeletePreference (DeletePreferenceRequest) returns (DeletePreferenceReply) {}
+  rpc GetCounties (GetCountiesRequest) returns (GetCountiesReply) {}
+  rpc AddSourceVideo (AddSourceVideoRequest) returns (AddSourceVideoReply) {}
+  rpc EditSourceVideo (EditSourceVideoRequest) returns (EditSourceVideoReply) {}
+  rpc DeleteSourceVideo (DeleteSourceVideoRequest) returns (DeleteSourceVideoReply) {}
+}
+
+// When a new user is added to VNP, it should add it to the VNE, it can be done in the signup or after
+// finalizing the preferences.
+//Sample Request body:
+//{
+//  'user_id': '8557f811-69e9-4379-912f-4ddbacc3da00',
+//  'user_name': 'Andy',
+//  'zip_code': 75001,
+//  'gender': 0,
+//  'birth_year': 1,
+//  'ip_address': '192.0.20.233',
+//  'pref_geo': [''],
+//  'not_pref_geo': ['san francisco'],
+//  'pref_people_organization': ['app,software'],
+//  'not_pref_people_organization': [''],
+//  'pref_highlevel_subject': ['Sport'],
+//  'not_pref_highlevel_subject': ['Business'],
+//  'pref_subject': [''],
+//  'not_pref_subject': [''],
+//  'pref_source_entity': ['CBS network'],
+//  'not_pref_source_entity': [''],
+//  'pref_personal_interest': [''],
+//  'preferred_lineup_duration': 5
+// }
+message AddUserRequest {
+  string user_id = 1;// Unique user ID for create new user (UUID)
+  string user_name = 2;//User Name
+  int32 zip_code = 3;//Zip code number
+  oneof gender_oneof{
+    int32 gender = 4;//User gender
+  }
+  oneof birth_year_oneof{
+    int32 birth_year = 5;//User birth year
+  }
+  string ip_address = 6;//User IP Address
+  repeated string pref_geo = 7;//User favorite place
+  repeated string not_pref_geo = 8;//User unfavorable place
+  repeated string pref_people_organization = 9;//User favorite organization
+  repeated string not_pref_people_organization = 10;//User unfavorable organization
+  repeated string pref_highlevel_subject = 11;// User favorite high level subject
+  repeated string not_pref_highlevel_subject = 12;//User unfavorable high level subject
+  //  repeated string pref_subject = 13;//User favorite subject
+  //  repeated string not_pref_subject = 14;//User unfavorable subject
+  repeated string pref_source_entity = 15;//User favorite source entity
+  repeated string not_pref_source_entity = 16;//User unfavorable source entity
+  repeated string pref_personal_interest = 17;//User personal interest
+  oneof preferred_lineup_duration_oneof{
+    int32 preferred_lineup_duration = 18;//Favorite lineup duration
+  }
+}
+
+//The VNE gets user fields and returns the user_id if the action is successful.
+//Sample Reply body:
+//{
+//  'user_id':'8557f811-69e9-4379-912f-4ddbacc3da00'
+// }
+message AddUserReply {
+  string user_id = 1;//Unique user ID (UUID)
+  string message = 2;//VNE message for failed response
+  string status = 3;//Status of the progress
+}
+
+// When a marker add a new story to the engine, VNP will add it to VNE.
+//Sample Request body:
+//{
+//  'story_id': 'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417',
+//  'source_entity': 'CBS network',
+//  'show_name': '60 Minutes',
+//  'video_url': 'www.google.com/...',
+//  'frame_rate':  44.056,
+//  'title': "Chief Arredondo Talks About Floyd's Incident Part 1",
+//  'story_type': 'HN',
+//  'story_highlevel_subjects': 'JCL',
+//  'story_rank': 1,
+//  'lede_subtitle_text': 'test lede_subtitle_text',
+//  'rest_story_subtitle_text': 'test rest_story_subtitle_text',
+//  'story_start_time': '04:57:12',
+//  'lede_duration': 28.2,
+//  'story_end_time': '09:24:03',
+//  'show_publication_datetime': '2022-06-21 19:00:00',
+//  'show_length': 266.7
+// }
+message AddStoryRequest {
+  string story_id = 1;//Unique Story ID (UUID)
+  string source_entity = 2;//Story source entity
+  string show_name = 3;//Story show name
+  string video_url = 4;//Story video URL
+  oneof frame_rate_oneof{
+    float frame_rate = 5;//Story frame rate
+  }
+  string title = 6;//Story title
+  string story_type = 7;//Story type
+  repeated string story_highlevel_subjects = 8;//Story high level subjects
+  int32 story_rank = 9;//Story rank
+  string lede_subtitle_text = 10;//Lede story subtitle text
+  string rest_story_subtitle_text = 11;//Rest story subtitle text
+  string story_start_time = 12;//Story start time
+  float lede_duration = 13;//Story lede duration
+  string story_end_time = 14;//Story end time
+  string show_publication_datetime = 15;//Show publication date time
+  oneof show_length_oneof{
+    float show_length = 16;//Show length
+  }
+  string show_id = 17;
+}
+
+//The VNE gets story fields and returns the story_id if the action is successful.
+//Sample Reply body:
+//{
+// 'story_id': 'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417'
+// }
+message AddStoryReply {
+  string story_id = 1;//Unique Story ID (UUID)
+  string message = 2;//VNE message for failed response
+  string status = 3;//Status of the progress
+}
+
+// When a user on the platforms of VNP want to see his/her lineup, VNP will send a request to VNE via GRPC.
+//Sample Request body:
+//{
+// 'user_id': '8557f811-69e9-4379-912f-4ddbacc3da00',
+// 'ip_address': '122.112.113.114',
+// 'preferred_lineup_duration': 5,
+// 'lat': 38.917032,
+// 'long': -95.06455
+// }
+message CreateLineupRequest {
+  string user_id = 1;//Unique user ID (UUID)
+  string ip_address = 2;//User IP Address
+  int32 preferred_lineup_duration = 3;// User preferred lineup duration
+  float latitude = 4;//Geographic coordinate that specifies the north–south position
+  float longitude = 5;//Geographic coordinate that specifies the east–west position
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'lineup_id': 'b6ef0f14-8d31-4106-8722-6ecf0cbd0b64',
+// 'story_ids': [7146, 7145, 7951, 8394, 8392]
+// }
+message CreateLineupReply {
+  string lineup_id = 1;//Unique lineup ID (UUID)
+  repeated string story_ids = 2;//list of story id
+  string message = 3;//VNE message for failed response
+}
+
+
+// When admin or marker want to remove a story, VNP will send a request to VNE to remove a story.
+// if the story had effect on user's preference, removing story wont undo the effect.
+//Sample Request body:
+//{
+// 'story_id': 'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417'
+// }
+message DeleteStoryRequest {
+  string story_id = 1;//Unique Story ID (UUID)
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'story_id': 'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417'
+// }
+message DeleteStoryReply {
+  string story_id = 1;//Unique Story ID (UUID)
+  string message = 2;//VNE message for failed response
+}
+
+
+
+//When a user want to remove his/her account, VNP will send a request to VNE to remove the user.
+//BTW, VNE only removes personal information, but his/her preferences would be useful for story recomendation to fresh users.
+//Sample Request body:
+//{
+//'user_id':'8557f811-69e9-4379-912f-4ddbacc3da00',
+//'remove_type:'Inactive'
+//}
+message DeleteUserRequest {
+  string user_id = 1;//Unique user ID (UUID)
+  string remove_type = 2;//Remove type
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+//'user_id':'8557f811-69e9-4379-912f-4ddbacc3da00'
+//}
+message DeleteUserReply {
+  string user_id = 1;//Unique user ID (UUID)
+  string message = 2;//VNE message for failed response
+}
+
+
+//1- User changes field or fields (zip codes, pref/not pref story types ....)
+//2- The VNP detects the changed field(s) and only sends a GRPC msg to VNE
+//3- The VNE overwrites the field(s). in other words, edit, add or remove things
+//For example if a user wants to edit his/her user name and zip code:
+//{
+// 'user_id': '503f3edc-c661-11ea-9bd7-c7df0d7a67c8',
+// 'user_name': 'Alex',
+// 'zip_code': '71005'
+//}
+//VNP changes his user name and zip code then notifies VNE with a GRPC message containing the user_id.
+message EditUserRequest {
+  string user_id = 1;//Unique Story ID (UUID)
+  oneof user_name_oneof{
+    string user_name = 2;//User Name
+  }
+  oneof zip_codes_oneof{
+    int32 zip_code = 3;//Zip code number
+  }
+  oneof gender_oneof{
+    int32 gender = 4;//User gender
+  }
+  oneof birth_year_oneof{
+    int32 birth_year = 5;//User birth year
+  }
+  oneof ip_address_oneof{
+    string ip_address = 6;//User IP Address
+  }
+  repeated string pref_geo = 7;//User favorite place
+  repeated string not_pref_geo = 8;//User unfavorable place
+  repeated string pref_people_organization = 9;//User favorite organization
+  repeated string not_pref_people_organization = 10;//User unfavorable organization
+  repeated string pref_highlevel_subject = 11;// User favorite high level subject
+  repeated string not_pref_highlevel_subject = 12;//User unfavorable high level subject
+  repeated string pref_subject = 13;//User favorite subject
+  repeated string not_pref_subject = 14;//User unfavorable subject
+  repeated string pref_source_entity = 15;//User favorite source entity
+  repeated string not_pref_source_entity = 16;//User unfavorable source entity
+  repeated string pref_personal_interest = 17;//User personal interest
+  oneof preferred_lineup_duration_oneof{
+    int32 preferred_lineup_duration = 18;//Favorite lineup duration
+  }
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+//'user_id': '503f3edc-c661-11ea-9bd7-c7df0d7a67c8'
+//}
+message EditUserReply {
+  string user_id = 1;//Unique user ID (UUID)
+  string message = 2;//VNE message for failed response
+  string status = 3;//Status of the progress
+}
+
+
+//1- VNP gets the story's information and show them to the Marker
+//2- Marker changes field or fields (title, story type ....)
+//3- the VNP detects the changed field(s) and sends a msg containing story_id and changed fields to VNE
+//4- The VNE overwrites the field(s). in other words, edit, add or remove things
+//For example if VNP wants to edit title and type of a story:
+//"{
+// 'story_id': 'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417',
+// 'title': 'D.C. Mayor did something',
+// 'story_type': 'SN'
+//}"
+//VNP changes title and story_type then notifies VNE with a GRPC message containing the story_id.
+message EditStoryRequest {
+  string story_id = 1;//Unique Story ID (UUID)
+  string source_entity = 2;//Story source entity
+  string show_name = 3;//Story show name
+  string video_url = 4;//Story video URL
+  oneof frame_rate_oneof{
+    float frame_rate = 5;//Story frame rate
+  }
+  string title = 6;//Story title
+  string story_type = 7;//Story type
+  string story_highlevel_subjects = 8;//Story high level subjects
+  int32 story_rank = 9;//Story rank
+  string lede_subtitle_text = 10;//Lede story subtitle text
+  string rest_story_subtitle_text = 11;//Rest story subtitle text
+  string story_start_time = 12;//Story start time
+  float lede_duration = 13;//Story lede duration
+  string story_end_time = 14;//Story end time
+  string show_publication_datetime = 15;//Show publication date time
+  oneof show_length_oneof{
+    float show_length = 16;//Show length
+  }
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+//'story_id':'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417'
+//}
+message EditStoryReply {
+  string story_id = 1;//Unique story ID (UUID)
+  string message = 2;//VNE message for failed response
+  string status = 3;//Status of the progress
+}
+
+//A button is surfaced on VNP to user when viewing the story, when clicked asks VNE for specialized lineup and similar stories.
+//Sample Request body:
+//{
+// 'story_id': 'f31ce620-ac1e-4a1b-aa14-82a1ec3bd417',
+// 'ip_address': '122.112.113.114',
+// 'preferred_lineup_duration': 5,
+// 'latitude': 38.917032,
+// 'longitude': -95.06455
+// }
+message GetSimilarStoriesRequest {
+  string story_id = 1;//Unique story ID (UUID)
+  string ip_address = 2;//IP address
+  int32 preferred_lineup_duration = 3;//Preferred lineup duration
+  float latitude = 4;//Geographic coordinate that specifies the north–south position
+  float longitude = 5;//Geographic coordinate that specifies the east–west position
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+//'story_ids':["4661a552-a0e8-43c9-a916-23940faddc96"]
+//}
+message GetSimilarStoriesReply {
+  repeated string story_ids = 1;//List of story id
+  string message = 2;//VNE message for failed response
+}
+
+//Marker's can get the tags of a story in their endpoint, they can see the tags that created by VNE.
+//Sample Request body:
+//{
+//'story_ids':["4661a552-a0e8-43c9-a916-23940faddc96"]
+//}
+message GetStoryTagsRequest {
+  string story_id = 1;//Unique story ID (UUID)
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'story_id': '4661a552-a0e8-43c9-a916-23940faddc96',
+// 'marker_tag': 'JCL',
+// 'vne_tag': 'JCL'}
+message GetStoryTagsReply {
+  string story_id = 1;//Unique story ID (UUID)
+  repeated string marker_tag = 2;//Marker Tag
+  repeated string vne_tag = 3;//VNE Tag
+  string message = 4;//VNE message for failed response
+}
+
+//When VNP want to get the all available geo, subject, entities (people or organizations name) and main subjects on the VNE,
+//it can use this endpoint.
+//Sample Request:
+//{
+//'requested_tag_type':'Entity',
+//'search_string':'ronaldo'
+//}
+message GetTagsRequest{
+  string requested_tag_type = 1;// Requested tag
+  string search_string = 2;// Search string
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'tags': ['ronald reagan', 'arsenal', 'ronaldo', 'cristiano ronaldo', 'mcdonald']
+// }
+message GetTagsReply{
+  repeated string tags = 1;//List of tags
+  string message = 2;//VNE message for failed response
+}
+//You can see what is the user's preference (user entered and actual preferences) with their scores.
+//Sample Request body:
+//{
+//'user_id': '503f3edc-c661-11ea-9bd7-c7df0d7a67c8'
+//}
+message GetPreferencesRequest{
+  string user_id = 1;//Unique user ID (UUID)
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'preferences': ['pref_source_entity', 'not_pref_source_entity', 'pref_subject', 'not_pref_subject', 'pref_words_entity', 'not_pref_words_entity', 'pref_location', 'not_pref_location']
+//}
+message GetPreferencesReply{
+  repeated string preferences = 1;//List of user preferences
+  string message = 2;//VNE message for failed response
+}
+//VNP can send a request to get the number of stories for a user which has a reasonable score for the user and
+//number of stories that the user can see in the lineups.
+//Sample Request body:
+//{
+//'user_id':'8557f811-69e9-4379-912f-4ddbacc3da00',
+//}
+message GetUserStoryRequest{
+  string user_id = 1;//Unique user ID (UUID)
+  float latitude = 2;//Geographic coordinate that specifies the position latitude
+  float longitude = 3;//Geographic coordinate that specifies the position longitude
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'number_of_stories': [5498, 7256, 7323, 4877, 7320, 7313, 4896]
+// }
+message GetUserStoryReply{
+  repeated int32 number_of_stories = 1;//List of story id
+  string message = 2;//VNE message for failed response
+}
+
+//Ping stats of GRPC server
+message PingRequest {}
+message PingReply {}
+
+//VNP can send a request to update the lineups table by sending a request to get all the lineups of each user.
+//Sample Request body:
+//{
+// 'first_lineups:100,
+// 'skip': 2000,
+//}
+message ReSyncRequest{
+  int32 first_lineups = 1;//The number of lineups we requested
+  int32 skip = 2;//The number of lineups we skipped
+}
+
+message ReSyncReplyHelper {
+  string lineup_id = 1;//Lineup unique ID (UUID)
+  repeated string story_ids = 2;//List of story ID
+}
+
+//VNP will send all the lineups lists with pagination.
+//Sample Reply body:
+//{
+// 'lineups': [
+//  {'lineup_id': 'a8715764-fd41-42cc-ba2e-24ab4bc152a7',
+//   'story_ids': [4677, 7343, 4619, 4583, 7324, 4695, 1534, 4713, ...]},...
+//  ]
+//}
+message ReSyncReply{
+  repeated ReSyncReplyHelper lineups = 1;//List of all lineups with story ids
+  string message = 2;//VNE message for failed response
+}
+
+//Admins can add new sources to the VNE.
+//Sample Request body:
+//{
+// source_name': 'HBO',
+// dma_list:['San Jose', 'Los Angeles', 'New York],
+// created_by:'William'
+//}
+message AddSourceRequest{
+  string source_name = 1;//Source Name
+  repeated string dma_list = 2;//List of DMA
+  string created_by = 3;//Creator Name
+  string VNP_id = 4;//VNP id
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'status': 'successful'}
+message AddSourceReply{
+  string status = 1;//Status of operation
+  string message = 2;//VNE message for failed response
+}
+
+//Admins can change the name of the source.
+//Sample Request body:
+//{
+// 'source_name': 'HBO'
+// 'new_source_name':'Netflix'
+//}
+message EditSourceRequest{
+  string source_name = 1;//Old source name
+  string new_source_name = 2;//New source name
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'status': 'successful'}
+message EditSourceReply{
+  string status = 1;//Status op operation
+  string message = 2;//VNE message for failed response
+}
+
+//VNP can get the list of all the sources.
+message GetSourcesRequest{}
+
+message GetSourcesReplyHelper{
+  string source_name = 1;//Source Name
+  repeated string DMA_list = 2;//List of DMA
+  oneof num_oneof{
+    int32 number_of_videos = 3;//Number of all videos related to source
+  }
+  oneof datetime_oneof{
+    string datetime = 4;//Source creation date
+  }
+  oneof created_by_oneof{
+    string created_by = 5;//Creator Name
+  }
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'sources': [
+// {'source_name': 'ABC7',
+// 'DMA_list': ['San Jose', 'Los Angeles', 'New York'],
+// 'number_of_videos': 237,
+// 'datetime': '2020-12-14T05:13:05.000000000',
+// 'created_by': 'william'}, ...
+// ]}
+message GetSourcesReply{
+  repeated GetSourcesReplyHelper sources = 1;//List of all sources
+  string message = 2;//VNE message for failed response
+}
+
+
+//VNP can add DMA
+//Sample request body:
+//{'dma_name': 'Germany',
+// 'counties_id':[
+//'Hamburg',
+//'Munich',
+//'Koln'],
+// 'created_by':'William'
+//}
+message AddDMARequest{
+  string dma_name = 1; //Name of the new DMA
+  repeated string counties_id = 2; //List of id of counties for the DMA
+  string created_by = 3; //The person who created the DMA
+  string VNP_id = 4;
+}
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'message':'successful}
+message AddDMAReply{
+  string message = 1;//Status of the event
+}
+
+
+// VNP can update the existing DMAs
+//{
+// 'county_id': '4385125b-dd1e-3025-880f-3311517cc8d5',
+// 'new_dma:'Los Angeles'
+//}
+message UpdateDMARequest {
+  string county_id = 1;// Id of target county
+  string new_dma = 2;// The new DMA
+}
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'message':'successful}
+message UpdateDMAReply {
+  string message = 1;//Status of the event
+}
+
+// VNP can get DMAs with specific filter and pagination
+//{
+// 'limit':2,
+// 'skip':5,
+// 'filter:'ad'
+// }
+message GetDMARequest {
+  int32 limit = 1;//Limitation of the request
+  int32 skip = 2;//Number of dma skipped
+  string filter = 3;//Filter requests
+}
+
+message dma_list_helper{
+  string VNP_id = 1;//VNP id
+  string DMA_name = 2;//DMA name
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'dma_list': [
+// {'VNP_id': 669, 'DMA_name': 'MADISON'},
+// {'VNP_id': 628, 'DMA_name': 'MONROE-EL DORADO'},
+// {'VNP_id': 632, 'DMA_name': 'PADUCAH-CAPE GIRARDEAU-HARRISBURG'},
+// {'VNP_id': 504, 'DMA_name': 'PHILADELPHIA'},
+// {'VNP_id': 657, 'DMA_name': 'SHERMAN-ADA'}
+// ],
+// 'remaining_dma': 1}
+message GetDMAReply {
+  repeated dma_list_helper dma_list = 1;//DMA list contain vnp id and dma name
+  int32 remaining_dma = 2;//Number of dma left
+
+}
+
+// VNP can edit the DMAs
+// {
+//   'dma_name': 'Los Angeles',
+//   'new_dma_name': 'San Jose'
+// }
+message EditDMANameRequest {
+  string dma_name = 1;//DMA name
+  string new_dma_name = 2;//New DMA name
+}
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'status':'successful}
+message EditDMANameReply {
+  string status = 1;//Status of the event
+}
+
+// VNP can add preference
+// {
+//   'user_id': '4385125b-dd1e-3025-880f-3311517cc8d5'
+//   'pref_subject:[
+//       'Olympic 2021',
+//       'basketball']
+// }
+message AddPreferenceRequest {
+  string user_id = 1;
+  repeated string pref_subject = 2;
+  repeated string pref_highlevel_subject = 3;
+  repeated string not_pref_highlevel_subject = 4;
+  repeated string pref_people_organization = 5;
+  repeated string not_pref_people_organization = 6;
+  repeated string pref_source_entity = 7;
+  repeated string not_pref_source_entity = 8;
+  repeated string pref_geo = 9;
+  repeated string not_pref_geo = 10;
+}
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'message': 'User has been updated user_id:dc1e3e8c-2b4c-4f7b-9385-cb510feee361'}
+message AddPreferenceReply {
+  string message = 1;
+}
+
+
+// VNP can delete preferences
+// {
+//   'user_id': '4385125b-dd1e-3025-880f-3311517cc8d5'
+//   'pref_subject:[
+//       'Olympic 2021',
+//       'basketball']
+// }
+
+message DeletePreferenceRequest {
+  string user_id = 1;
+  repeated string pref_subject = 2;
+  repeated string pref_highlevel_subject = 3;
+  repeated string not_pref_highlevel_subject = 4;
+  repeated string pref_people_organization = 5;
+  repeated string not_pref_people_organization = 6;
+  repeated string pref_source_entity = 7;
+  repeated string not_pref_source_entity = 8;
+  repeated string pref_geo = 9;
+  repeated string not_pref_geo = 10;
+}
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{'message': 'User has been updated user_id:dc1e3e8c-2b4c-4f7b-9385-cb510feee361'}
+message DeletePreferenceReply {
+  string message = 1;
+}
+// VNP can get Counties with specific filter and pagination
+//{
+// 'limit':2,
+// 'skip':5,
+// 'filter:'ad'
+// }
+message GetCountiesRequest{
+  int32 limit = 1;
+  int32 skip = 2;
+  string filter = 3;
+}
+
+message GetCountiesReplyhelper{
+  string id = 1;
+  string County_name = 2;
+  string State_name = 3;
+}
+
+// The reply containing the message from VNE.
+//Sample Reply body:
+//{
+// 'County_list': [
+// {'id': 'cc8b7924-e477-4ea9-87a2-c423d7ba572a', 'County_name': 'adams', 'State_name': 'indiana'},
+// {'id': 'c2f8f224-ac04-4e13-89d5-87fef89183fe', 'County_name': 'adams', 'State_name': 'mississippi'},
+// {'id': 'b4320bcd-65cc-420a-90ba-c4af0463846a', 'County_name': 'adams', 'State_name': 'north dakota'},
+// {'id': '21d3cbb5-d405-4e57-8ffc-0368b6eba933', 'County_name': 'adams', 'State_name': 'nebraska'},
+// {'id': '429cdd79-917d-4c3e-b47a-2b844d547906', 'County_name': 'adams', 'State_name': 'ohio'}
+// ],
+// 'remaining_County': 68}
+message GetCountiesReply{
+  repeated GetCountiesReplyhelper County_list = 1;
+  int32 remaining_County = 2;
+}
+
+
+message AddSourceVideoRequest{
+  oneof show_{string show=1;}
+  oneof publish_date_time_ {string publish_date_time=2;}
+  oneof video_link_{string video_link=3;}
+  oneof cc_link_{string CC_link=4;}
+  oneof vnp_id_{string vnp_id=5;}
+  oneof source_{string source=6;}
+}
+
+message AddSourceVideoReply{
+  string status=1;
+}
+
+message EditSourceVideoRequest{
+  string show=1;
+  string publish_date_time=2;
+  string video_link=3;
+  string CC_link=4;
+  oneof vnp_id_{string vnp_id=5;}
+  string source=6;
+}
+
+message EditSourceVideoReply{
+  string status=1;
+}
+
+message DeleteSourceVideoRequest{
+  oneof vnp_id_{string vnp_id=5;}
+}
+
+message DeleteSourceVideoReply{
+  string status=1;
+}

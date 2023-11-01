@@ -1,0 +1,3 @@
+#!/bin/sh
+bin/console doctrine:cache:clear-metadata && bin/console doctrine:cache:clear-query && bin/console doctrine:cache:clear-result
+&& APP_ENV=test bin/console d:d:c --if-not-exists && APP_ENV=test bin/console d:s:d -f && APP_ENV=test bin/console d:s:u -f && APP_ENV=test bin/console doctrine:fixtures:load --no-interaction && APP_ENV=test bin/console ivnews:paas-setup && APP_ENV=test phpdbg -qrr -d memory_limit=-1 vendor/bin/behat --colors --snippets-for

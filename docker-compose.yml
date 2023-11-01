@@ -1,0 +1,112 @@
+version: '3'
+volumes:
+  share-volume: {}
+services:
+  vnp-api-init:
+    build:
+      context: .
+      dockerfile: Dockerfile-api
+      cache_from:
+      - local/vnp-api:latest
+    image: local/vnp-api
+    volumes:
+      # - share-volume:/app:rw
+      - .:/app/ivnews/
+      #- ./.env:/app/ivnews/.variables  
+    entrypoint: /bin/sh
+    command: -c "/ivnews/init.sh"
+
+  vnp-api-app:
+    ports:
+    - 9000:9000
+    image: local/vnp-api
+    volumes:
+      - .:/app/ivnews/
+
+  # vnp-api-nginx
+  vnp-api-app-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+      args:
+        hostname: vnp-api-app
+      cache_from:
+      - local/vnp-api-nginx:latest
+    image: local/vnp-api-nginx
+    #hostname: vnp-api-app
+    ports: 
+    - 8080:8080
+    volumes:
+      - .:/app/ivnews/
+    depends_on:
+    -  database
+    -  redis
+
+  vnp-api-supervisor:
+    build:
+      context: .
+      dockerfile: Dockerfile-supervisor
+      cache_from:
+      - local/vnp-api-supervisor:latest
+    image: local/vnp-api-supervisor
+    ports: 
+    - 9001:9001
+    volumes:
+      - .:/app/ivnews/
+      - ./supervisor/supervisord-app.conf:/etc/supervisor/conf.d/supervisord.conf
+    depends_on: 
+    -  database
+    -  redis
+
+  vnp-api-del-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile-supervisor
+      cache_from:
+      - local/vnp-api-supervisor:latest
+    image: local/vnp-api-supervisor
+    ports: 
+    - 9002:9001
+    volumes:
+      - .:/app/ivnews/
+      - ./supervisor/supervisord-del-worker.conf:/etc/supervisor/conf.d/supervisord.conf
+    depends_on: 
+    -  database
+    -  redis
+
+  vnp-api-varnish:
+    build:
+      context: .
+      dockerfile: Dockerfile-varnish
+      cache_from:
+      - local/vnp-api-varnish:latest
+    image: local/vnp-api-varnish
+    ports: 
+    - 80:80
+    depends_on: 
+    -  database
+    -  redis
+
+  # MySQL
+  database:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ivnews@123
+      MYSQL_DATABASE: ivnews
+      MYSQL_USER: ivnews
+      MYSQL_PASSWORD: ivnews@123
+    ports:
+     - "3306:3306"
+    # volumes: 
+    #     - ./init:/docker-entrypoint-initdb.d
+  redis:
+    image: "redis:alpine"
+    command: redis-server
+    ports:
+     - "6379:6379"
+    volumes:
+    - $PWD/redis-data:/var/lib/redis
+    environment:
+     - REDIS_REPLICATION_MODE=master

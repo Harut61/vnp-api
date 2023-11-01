@@ -1,0 +1,10 @@
+swiftmailer:
+    #url: '%env(MAILER_URL)%'
+    transport: '%env(SWIFT_TRANSPORT)%'
+    username: '%env(SWIFT_USERNAME)%'
+    password: '%env(SWIFT_PASSWORD)%'
+    host:  '%env(SWIFT_HOST)%'
+    port:  '%env(SWIFT_PORT)%'
+    encryption: '%env(SWIFT_ENCRYPTION)%'
+    #auth_mode: '%env(SWIFT_AUTH)%'
+#    spool: { type: 'memory' }
